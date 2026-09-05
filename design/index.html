@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prototipe — Personal Finance & Investment Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="chart.umd.js"></script>
+<style>
+:root{
+  --navy:#0B1F3A;
+  --navy-light:#132a4d;
+  --bg:#F7F5F0;
+  --card:#FFFFFF;
+  --line:#E4E0D6;
+  --ink:#1A1D22;
+  --ink-soft:#6B6F76;
+  --green:#1B7A5A;
+  --green-bg:#E7F2ED;
+  --terracotta:#B4483B;
+  --terracotta-bg:#F7E9E7;
+  --gold:#C9A24B;
+  --gold-bg:#FBF3E1;
+  --radius:10px;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  display:flex;
+  min-height:100vh;
+  font-size:14px;
+}
+::selection{background:var(--gold-bg); color:var(--navy);}
+
+/* ===== SIDEBAR ===== */
+.sidebar{
+  width:230px;
+  min-width:230px;
+  background:var(--navy);
+  color:#fff;
+  display:flex;
+  flex-direction:column;
+  padding:28px 18px;
+  position:sticky;
+  top:0;
+  height:100vh;
+}
+.brand{
+  font-family:'Fraunces',serif;
+  font-size:19px;
+  font-weight:600;
+  letter-spacing:-0.01em;
+  margin-bottom:4px;
+}
+.brand-sub{
+  font-size:11px;
+  color:#8FA3C4;
+  margin-bottom:36px;
+  letter-spacing:.02em;
+}
+.nav-group-label{
+  font-size:10.5px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:#5D75A0;
+  margin:18px 0 8px 10px;
+  font-weight:600;
+}
+.nav-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:9px 10px;
+  border-radius:8px;
+  color:#C6D2E6;
+  text-decoration:none;
+  font-size:13.5px;
+  font-weight:500;
+  cursor:pointer;
+  transition:background .15s, color .15s;
+  margin-bottom:2px;
+}
+.nav-item:hover{background:rgba(255,255,255,.06); color:#fff;}
+.nav-item.active{background:#fff; color:var(--navy);}
+.nav-item .dot{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.5;}
+.sidebar-footer{
+  margin-top:auto;
+  padding-top:16px;
+  border-top:1px solid rgba(255,255,255,.1);
+  font-size:11.5px;
+  color:#5D75A0;
+  line-height:1.5;
+}
+
+/* ===== MAIN ===== */
+.main{
+  flex:1;
+  padding:30px 40px 60px;
+  max-width:1180px;
+}
+.page{display:none;}
+.page.active{display:block; animation:fadeIn .25s ease;}
+@keyframes fadeIn{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+
+.page-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  margin-bottom:26px;
+  flex-wrap:wrap;
+  gap:16px;
+}
+.page-title{
+  font-family:'Fraunces',serif;
+  font-size:26px;
+  font-weight:600;
+  color:var(--navy);
+  letter-spacing:-0.01em;
+}
+.page-desc{color:var(--ink-soft); font-size:13px; margin-top:4px;}
+
+.btn{
+  background:var(--navy);
+  color:#fff;
+  border:none;
+  padding:10px 18px;
+  border-radius:8px;
+  font-size:13.5px;
+  font-weight:600;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  transition:background .15s, transform .1s;
+  font-family:'Inter',sans-serif;
+}
+.btn:hover{background:var(--navy-light);}
+.btn:active{transform:scale(.98);}
+.btn-outline{
+  background:transparent;
+  border:1.5px solid var(--line);
+  color:var(--ink);
+}
+.btn-outline:hover{border-color:var(--navy); background:#fff;}
+.btn-sm{padding:6px 12px; font-size:12.5px;}
+
+/* ===== STAT CARDS ===== */
+.stat-row{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(220px,1fr));
+  gap:16px;
+  margin-bottom:24px;
+}
+.stat-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:18px 20px;
+}
+.stat-label{
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  color:var(--ink-soft);
+  font-weight:600;
+  margin-bottom:10px;
+}
+.stat-value{
+  font-family:'Fraunces',serif;
+  font-size:28px;
+  font-weight:600;
+  color:var(--navy);
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-0.01em;
+}
+.stat-sub{
+  font-size:12px;
+  margin-top:8px;
+  font-weight:500;
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+.stat-sub.up{color:var(--green);}
+.stat-sub.down{color:var(--terracotta);}
+.stat-card.accent-green{border-left:3px solid var(--green);}
+.stat-card.accent-terracotta{border-left:3px solid var(--terracotta);}
+.stat-card.accent-gold{border-left:3px solid var(--gold);}
+.stat-card.accent-navy{border-left:3px solid var(--navy);}
+
+/* ===== GRID LAYOUT ===== */
+.grid-2{display:grid; grid-template-columns:1.4fr 1fr; gap:18px; margin-bottom:18px;}
+.grid-2b{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:18px;}
+@media(max-width:900px){.grid-2, .grid-2b{grid-template-columns:1fr;}}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:20px 22px;
+}
+.card-title{
+  font-size:14px;
+  font-weight:600;
+  color:var(--navy);
+  margin-bottom:2px;
+}
+.card-sub{font-size:12px; color:var(--ink-soft); margin-bottom:14px;}
+.chart-wrap{position:relative; height:230px;}
+.chart-wrap.tall{height:290px;}
+
+/* ===== TABLE ===== */
+.table-toolbar{
+  display:flex;
+  gap:10px;
+  margin-bottom:16px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.table-toolbar input, .table-toolbar select{
+  padding:8px 12px;
+  border:1px solid var(--line);
+  border-radius:7px;
+  font-size:13px;
+  font-family:'Inter',sans-serif;
+  background:#fff;
+  color:var(--ink);
+}
+.table-toolbar input[type="text"]{flex:1; min-width:160px;}
+.table-scroll{
+  overflow-x:auto;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:#fff;
+}
+table{width:100%; border-collapse:collapse; font-size:13px;}
+thead th{
+  text-align:left;
+  padding:11px 14px;
+  background:var(--navy);
+  color:#fff;
+  font-weight:600;
+  font-size:11.5px;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  white-space:nowrap;
+  position:sticky;
+  top:0;
+}
+th.sortable{
+  cursor:pointer;
+  user-select:none;
+  transition:background .12s;
+}
+th.sortable:hover{background:var(--navy-light);}
+th.sortable .sort-icon{
+  display:inline-block;
+  margin-left:5px;
+  opacity:.4;
+  font-size:10px;
+}
+th.sortable.sort-active .sort-icon{opacity:1; color:var(--gold);}
+tbody td{
+  padding:10px 14px;
+  border-bottom:1px solid var(--line);
+  white-space:nowrap;
+}
+tbody tr:hover{background:#FAF9F6;}
+tbody tr:last-child td{border-bottom:none;}
+.amt{font-family:'JetBrains Mono',monospace; font-weight:500; text-align:right;}
+.amt.income{color:var(--green);}
+.amt.expense{color:var(--terracotta);}
+.badge{
+  display:inline-block;
+  padding:3px 10px;
+  border-radius:20px;
+  font-size:11.5px;
+  font-weight:600;
+}
+.badge.income{background:var(--green-bg); color:var(--green);}
+.badge.expense{background:var(--terracotta-bg); color:var(--terracotta);}
+.cat-tag{
+  font-size:12px;
+  color:var(--ink-soft);
+  background:#F0EEE8;
+  padding:3px 9px;
+  border-radius:6px;
+}
+.row-actions{display:flex; gap:6px;}
+.icon-btn{
+  width:26px; height:26px;
+  border-radius:6px;
+  border:1px solid var(--line);
+  background:#fff;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+  color:var(--ink-soft);
+  font-size:13px;
+}
+.icon-btn:hover{border-color:var(--navy); color:var(--navy);}
+.table-footer{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:12px;
+  font-size:12.5px;
+  color:var(--ink-soft);
+}
+
+/* ===== MODAL FORM ===== */
+.modal-overlay{
+  position:fixed; inset:0;
+  background:rgba(11,31,58,.45);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:100;
+  backdrop-filter:blur(2px);
+}
+.modal-overlay.open{display:flex;}
+.modal{
+  background:#fff;
+  border-radius:14px;
+  padding:26px 28px;
+  width:420px;
+  max-width:92vw;
+  box-shadow:0 20px 60px rgba(0,0,0,.25);
+}
+.modal h3{
+  font-family:'Fraunces',serif;
+  font-size:19px;
+  color:var(--navy);
+  margin-bottom:18px;
+}
+.form-row{margin-bottom:14px;}
+.form-row label{
+  display:block;
+  font-size:12px;
+  font-weight:600;
+  color:var(--ink-soft);
+  margin-bottom:6px;
+  text-transform:uppercase;
+  letter-spacing:.03em;
+}
+.form-row input, .form-row select{
+  width:100%;
+  padding:10px 12px;
+  border:1.5px solid var(--line);
+  border-radius:8px;
+  font-size:13.5px;
+  font-family:'Inter',sans-serif;
+}
+.form-row input:focus, .form-row select:focus{outline:none; border-color:var(--navy);}
+.toggle-type{display:flex; gap:8px;}
+.toggle-type button{
+  flex:1;
+  padding:10px;
+  border-radius:8px;
+  border:1.5px solid var(--line);
+  background:#fff;
+  cursor:pointer;
+  font-weight:600;
+  font-size:13px;
+  color:var(--ink-soft);
+}
+.toggle-type button.sel-income.active{border-color:var(--green); background:var(--green-bg); color:var(--green);}
+.toggle-type button.sel-expense.active{border-color:var(--terracotta); background:var(--terracotta-bg); color:var(--terracotta);}
+.modal-actions{display:flex; gap:10px; margin-top:20px; justify-content:flex-end;}
+
+/* ===== AI INSIGHT BOX ===== */
+.ai-insight{
+  background:linear-gradient(135deg, var(--navy) 0%, #1a3a63 100%);
+  border-radius:var(--radius);
+  padding:20px 22px;
+  color:#fff;
+  position:relative;
+  overflow:hidden;
+}
+.ai-insight::before{
+  content:'';
+  position:absolute;
+  top:-40px; right:-40px;
+  width:140px; height:140px;
+  background:radial-gradient(circle, rgba(201,162,75,.25), transparent 70%);
+}
+.ai-tag{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  background:rgba(201,162,75,.2);
+  color:var(--gold);
+  padding:4px 10px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.03em;
+  margin-bottom:12px;
+}
+.ai-insight p{font-size:13.5px; line-height:1.6; color:#E4E9F2; position:relative; z-index:1;}
+.ai-insight .btn{margin-top:14px; background:#fff; color:var(--navy);}
+.ai-insight .btn:hover{background:var(--gold-bg);}
+
+/* ===== CHATBOT PANEL ===== */
+.chat-fab{
+  position:fixed;
+  bottom:26px; right:26px;
+  width:58px; height:58px;
+  border-radius:50%;
+  background:var(--navy);
+  color:#fff;
+  border:none;
+  cursor:pointer;
+  box-shadow:0 8px 24px rgba(11,31,58,.35);
+  display:flex; align-items:center; justify-content:center;
+  font-size:24px;
+  z-index:90;
+  transition:transform .15s;
+}
+.chat-fab:hover{transform:scale(1.06);}
+.chat-panel{
+  position:fixed;
+  top:0; right:-420px;
+  width:400px;
+  height:100vh;
+  background:#fff;
+  box-shadow:-8px 0 30px rgba(0,0,0,.15);
+  z-index:95;
+  display:flex;
+  flex-direction:column;
+  transition:right .28s ease;
+}
+.chat-panel.open{right:0;}
+.chat-header{
+  background:var(--navy);
+  color:#fff;
+  padding:20px 22px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.chat-avatar{
+  width:36px; height:36px;
+  border-radius:50%;
+  background:var(--gold);
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px;
+  flex-shrink:0;
+}
+.chat-header-text{flex:1;}
+.chat-header-text .name{font-weight:600; font-size:14px;}
+.chat-header-text .status{font-size:11.5px; color:#8FA3C4; display:flex; align-items:center; gap:5px;}
+.status .dot{width:6px; height:6px; border-radius:50%; background:#4CAF7D;}
+.chat-close{background:none; border:none; color:#C6D2E6; font-size:20px; cursor:pointer;}
+.chat-mode-switch{
+  display:flex;
+  gap:6px;
+  padding:12px 16px;
+  border-bottom:1px solid var(--line);
+  background:#FAF9F6;
+}
+.chat-mode-btn{
+  flex:1;
+  padding:8px;
+  border-radius:7px;
+  border:1px solid var(--line);
+  background:#fff;
+  font-size:12px;
+  font-weight:600;
+  cursor:pointer;
+  color:var(--ink-soft);
+}
+.chat-mode-btn.active{background:var(--navy); color:#fff; border-color:var(--navy);}
+.chat-body{
+  flex:1;
+  overflow-y:auto;
+  padding:18px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  background:var(--bg);
+}
+.msg{
+  max-width:85%;
+  padding:11px 14px;
+  border-radius:12px;
+  font-size:13px;
+  line-height:1.55;
+}
+.msg.bot{
+  background:#fff;
+  border:1px solid var(--line);
+  align-self:flex-start;
+  border-top-left-radius:3px;
+}
+.msg.user{
+  background:var(--navy);
+  color:#fff;
+  align-self:flex-end;
+  border-top-right-radius:3px;
+}
+.msg.bot strong{color:var(--navy);}
+.disclaimer{
+  font-size:10.5px;
+  color:var(--ink-soft);
+  text-align:center;
+  padding:8px 16px;
+  border-top:1px solid var(--line);
+  background:#FAF9F6;
+}
+.chat-input-row{
+  display:flex;
+  gap:8px;
+  padding:14px 16px;
+  border-top:1px solid var(--line);
+  background:#fff;
+}
+.chat-input-row input{
+  flex:1;
+  padding:11px 14px;
+  border:1.5px solid var(--line);
+  border-radius:22px;
+  font-size:13px;
+  font-family:'Inter',sans-serif;
+}
+.chat-input-row input:focus{outline:none; border-color:var(--navy);}
+.chat-send{
+  width:40px; height:40px;
+  border-radius:50%;
+  background:var(--navy);
+  color:#fff;
+  border:none;
+  cursor:pointer;
+  font-size:15px;
+  flex-shrink:0;
+}
+.chat-send:hover{background:var(--navy-light);}
+.typing{display:flex; gap:4px; padding:6px 4px;}
+.typing span{width:6px; height:6px; background:var(--ink-soft); border-radius:50%; animation:blink 1.2s infinite;}
+.typing span:nth-child(2){animation-delay:.2s;}
+.typing span:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,60%,100%{opacity:.3;} 30%{opacity:1;}}
+
+.legend-row{display:flex; gap:16px; flex-wrap:wrap; margin-top:10px;}
+.legend-item{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-soft);}
+.legend-dot{width:9px; height:9px; border-radius:2px;}
+
+.proto-banner{
+  background:var(--gold-bg);
+  border:1px solid #E8D391;
+  color:#7A5F1C;
+  padding:10px 16px;
+  border-radius:8px;
+  font-size:12px;
+  margin-bottom:20px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+@media(max-width:760px){
+  .sidebar{position:fixed; left:-230px; z-index:110; transition:left .25s;}
+  .sidebar.open{left:0;}
+  .main{padding:20px 16px 60px;}
+  .chat-panel{width:100%; right:-100%;}
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="brand">Cuan.id</div>
+  <div class="brand-sub">Personal Finance Tracker</div>
+
+  <div class="nav-group-label">Cashflow Harian</div>
+  <div class="nav-item active" data-page="input" onclick="showPage('input', this)">
+    <span class="dot"></span> Input & Tabel Transaksi
+  </div>
+  <div class="nav-item" data-page="dash-cashflow" onclick="showPage('dash-cashflow', this)">
+    <span class="dot"></span> Dashboard Cashflow
+  </div>
+
+  <div class="nav-group-label">Investasi</div>
+  <div class="nav-item" data-page="input-invest" onclick="showPage('input-invest', this)">
+    <span class="dot"></span> Input & Tabel Investasi
+  </div>
+  <div class="nav-item" data-page="dash-invest" onclick="showPage('dash-invest', this)">
+    <span class="dot"></span> Dashboard Investasi
+  </div>
+
+  <div class="sidebar-footer">
+    Prototipe tampilan · data simulasi<br>untuk validasi konsep sebelum dibangun.
+  </div>
+</aside>
+
+<main class="main">
+
+  <!-- ===================== PAGE: INPUT & TABEL CASHFLOW ===================== -->
+  <div class="page active" id="page-input">
+    <div class="proto-banner">⚠️ Ini adalah prototipe tampilan dengan data simulasi. Fitur input di bawah aktif secara lokal (tidak tersimpan permanen) untuk mendemonstrasikan alur kerja.</div>
+    <div class="page-header">
+      <div>
+        <div class="page-title">Transaksi Cashflow</div>
+        <div class="page-desc">Seluruh catatan pemasukan dan pengeluaran harian Anda</div>
+      </div>
+      <button class="btn" onclick="openModal()">+ Tambah Transaksi</button>
+    </div>
+
+    <div class="table-toolbar">
+      <input type="text" id="searchBox" placeholder="Cari deskripsi transaksi..." oninput="renderTable()">
+      <select id="filterType" onchange="renderTable()">
+        <option value="all">Semua Tipe</option>
+        <option value="income">Pemasukan</option>
+        <option value="expense">Pengeluaran</option>
+      </select>
+      <select id="filterCategory" onchange="renderTable()">
+        <option value="all">Semua Kategori</option>
+      </select>
+    </div>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th class="sortable" data-sort="date" onclick="setSort('date')">Tanggal <span class="sort-icon">▲</span></th>
+            <th class="sortable" data-sort="type" onclick="setSort('type')">Tipe <span class="sort-icon">▲</span></th>
+            <th class="sortable" data-sort="cat" onclick="setSort('cat')">Kategori <span class="sort-icon">▲</span></th>
+            <th class="sortable" data-sort="desc" onclick="setSort('desc')">Deskripsi <span class="sort-icon">▲</span></th>
+            <th class="sortable" data-sort="amt" style="text-align:right" onclick="setSort('amt')">Jumlah <span class="sort-icon">▲</span></th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+    <div class="table-footer">
+      <span id="tableCount">— transaksi ditampilkan</span>
+      <span id="tableSum"></span>
+    </div>
+  </div>
+
+  <!-- ===================== PAGE: DASHBOARD CASHFLOW ===================== -->
+  <div class="page" id="page-dash-cashflow">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Dashboard Cashflow</div>
+        <div class="page-desc">Ringkasan pemasukan & pengeluaran bulan berjalan</div>
+      </div>
+      <select class="btn-outline btn" style="cursor:pointer;">
+        <option>Agustus 2026</option>
+      </select>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-card accent-green">
+        <div class="stat-label">Total Pemasukan</div>
+        <div class="stat-value">Rp14.250.000</div>
+        <div class="stat-sub up">↑ 8,2% dari bulan lalu</div>
+      </div>
+      <div class="stat-card accent-terracotta">
+        <div class="stat-label">Total Pengeluaran</div>
+        <div class="stat-value">Rp9.680.000</div>
+        <div class="stat-sub down">↑ 14,5% dari bulan lalu</div>
+      </div>
+      <div class="stat-card accent-navy">
+        <div class="stat-label">Saldo Bersih</div>
+        <div class="stat-value">Rp4.570.000</div>
+        <div class="stat-sub up">Surplus bulan ini</div>
+      </div>
+      <div class="stat-card accent-gold">
+        <div class="stat-label">Rata-rata Harian</div>
+        <div class="stat-value">Rp312.000</div>
+        <div class="stat-sub">Pengeluaran per hari</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Tren Cashflow Harian</div>
+        <div class="card-sub">1–18 Agustus 2026</div>
+        <div class="chart-wrap"><canvas id="chartTrend"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Kategori Pengeluaran Terbanyak</div>
+        <div class="card-sub">Bulan berjalan</div>
+        <div class="chart-wrap"><canvas id="chartExpenseCat"></canvas></div>
+      </div>
+    </div>
+
+    <div class="grid-2b">
+      <div class="card">
+        <div class="card-title">Kategori Pemasukan Terbanyak</div>
+        <div class="card-sub">Bulan berjalan</div>
+        <div class="chart-wrap"><canvas id="chartIncomeCat"></canvas></div>
+      </div>
+      <div class="ai-insight">
+        <div class="ai-tag">✦ AI FINANCIAL ADVISOR</div>
+        <p><strong>Insight cashflow Anda:</strong> Pengeluaran kategori "Makan & Minum" naik 22% dibanding rata-rata 3 bulan terakhir, menjadi kontributor terbesar kedua setelah Tagihan. Surplus bulanan Anda masih sehat di Rp4,57 juta, namun jika tren kenaikan ini berlanjut, surplus bisa tergerus dalam 2 bulan ke depan.</p>
+        <button class="btn" onclick="openChat('cashflow')">💬 Tanya Lebih Lanjut</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== PAGE: INPUT & TABEL INVESTASI ===================== -->
+  <div class="page" id="page-input-invest">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Transaksi Investasi</div>
+        <div class="page-desc">Riwayat setor, tarik, dan update nilai portofolio per instrumen</div>
+      </div>
+      <button class="btn" onclick="openInvestModal()">+ Tambah Transaksi Investasi</button>
+    </div>
+
+    <div class="table-toolbar">
+      <input type="text" id="investSearchBox" placeholder="Cari instrumen..." oninput="renderInvestTable()">
+      <select id="investFilterJenis" onchange="renderInvestTable()">
+        <option value="all">Semua Jenis</option>
+      </select>
+      <select id="investFilterAksi" onchange="renderInvestTable()">
+        <option value="all">Semua Aksi</option>
+      </select>
+    </div>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th class="sortable" data-sort="date" onclick="setInvestSort('date')">Tanggal <span class="sort-icon">▲</span></th>
+            <th class="sortable" data-sort="instrument" onclick="setInvestSort('instrument')">Instrumen <span class="sort-icon">▲</span></th>
+            <th class="sortable" data-sort="jenis" onclick="setInvestSort('jenis')">Jenis <span class="sort-icon">▲</span></th>
+            <th class="sortable" data-sort="aksi" onclick="setInvestSort('aksi')">Aksi <span class="sort-icon">▲</span></th>
+            <th class="sortable" data-sort="amt" style="text-align:right" onclick="setInvestSort('amt')">Nominal <span class="sort-icon">▲</span></th>
+            <th class="sortable" data-sort="current" style="text-align:right" onclick="setInvestSort('current')">Nilai Saat Ini <span class="sort-icon">▲</span></th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="investTableBody"></tbody>
+      </table>
+    </div>
+    <div class="table-footer">
+      <span id="investTableCount">— entri ditampilkan</span>
+      <span id="investTableSum"></span>
+    </div>
+  </div>
+
+  <!-- ===================== PAGE: DASHBOARD INVESTASI ===================== -->
+  <div class="page" id="page-dash-invest">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Dashboard Investasi</div>
+        <div class="page-desc">Performa portofolio dibandingkan tingkat inflasi Indonesia</div>
+      </div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-card accent-navy">
+        <div class="stat-label">Total Nilai Portofolio</div>
+        <div class="stat-value">Rp87.400.000</div>
+        <div class="stat-sub up">↑ Rp5,2 jt sejak awal tahun</div>
+      </div>
+      <div class="stat-card accent-gold">
+        <div class="stat-label">Total Modal Disetor</div>
+        <div class="stat-value">Rp78.900.000</div>
+        <div class="stat-sub">Akumulasi semua instrumen</div>
+      </div>
+      <div class="stat-card accent-green">
+        <div class="stat-label">Return Portofolio (YoY)</div>
+        <div class="stat-value">+10,8%</div>
+        <div class="stat-sub up">Rp8,5 juta unrealized gain</div>
+      </div>
+      <div class="stat-card accent-terracotta">
+        <div class="stat-label">Inflasi Indonesia (YoY)</div>
+        <div class="stat-value">2,88%</div>
+        <div class="stat-sub">BPS · Juli 2026</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Return Portofolio vs Inflasi</div>
+        <div class="card-sub">Real return = return portofolio − inflasi</div>
+        <div class="chart-wrap tall"><canvas id="chartVsInflation"></canvas></div>
+        <div class="legend-row">
+          <div class="legend-item"><span class="legend-dot" style="background:#0B1F3A"></span> Return Portofolio</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#B4483B"></span> Inflasi YoY (BPS)</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Alokasi Aset</div>
+        <div class="card-sub">Berdasarkan nilai wajar saat ini</div>
+        <div class="chart-wrap"><canvas id="chartAllocation"></canvas></div>
+      </div>
+    </div>
+
+    <div class="grid-2b">
+      <div class="card">
+        <div class="card-title">Pertumbuhan Nilai Portofolio</div>
+        <div class="card-sub">6 bulan terakhir</div>
+        <div class="chart-wrap"><canvas id="chartGrowth"></canvas></div>
+      </div>
+      <div class="ai-insight">
+        <div class="ai-tag">✦ AI INVESTMENT ADVISOR</div>
+        <p><strong>Insight investasi Anda:</strong> Return portofolio 10,8% YoY berada jauh di atas inflasi 2,88%, menghasilkan real return positif sekitar 7,9%. Alokasi Anda saat ini didominasi Reksadana (42%) — pertimbangkan menambah porsi emas sebagai lindung nilai jika ingin mengurangi volatilitas.</p>
+        <button class="btn" onclick="openChat('investment')">💬 Tanya Lebih Lanjut</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ===================== MODAL: TAMBAH TRANSAKSI CASHFLOW ===================== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3>Tambah Transaksi</h3>
+    <div class="form-row">
+      <label>Tipe Transaksi</label>
+      <div class="toggle-type">
+        <button type="button" class="sel-income active" id="btnTypeIncome" onclick="setType('income')">↓ Pemasukan</button>
+        <button type="button" class="sel-expense" id="btnTypeExpense" onclick="setType('expense')">↑ Pengeluaran</button>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Tanggal</label>
+      <input type="date" id="inputDate" value="2026-08-18">
+    </div>
+    <div class="form-row">
+      <label>Kategori</label>
+      <select id="inputCategory"></select>
+    </div>
+    <div class="form-row">
+      <label>Jumlah (Rp)</label>
+      <input type="number" id="inputAmount" placeholder="0">
+    </div>
+    <div class="form-row">
+      <label>Deskripsi (opsional)</label>
+      <input type="text" id="inputDesc" placeholder="mis. Makan siang tim">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Batal</button>
+      <button class="btn" onclick="addTransaction()">Simpan Transaksi</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== CHATBOT PANEL ===================== -->
+<button class="chat-fab" onclick="toggleChat()" id="chatFab">✦</button>
+
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-header">
+    <div class="chat-avatar">✦</div>
+    <div class="chat-header-text">
+      <div class="name" id="chatName">Financial Advisor AI</div>
+      <div class="status"><span class="dot"></span> Online · GPT-4.1 mini</div>
+    </div>
+    <button class="chat-close" onclick="toggleChat()">✕</button>
+  </div>
+  <div class="chat-mode-switch">
+    <button class="chat-mode-btn active" id="modeCashflow" onclick="switchMode('cashflow')">💰 Cashflow Advisor</button>
+    <button class="chat-mode-btn" id="modeInvestment" onclick="switchMode('investment')">📈 Investment Advisor</button>
+  </div>
+  <div class="chat-body" id="chatBody"></div>
+  <div class="disclaimer">AI ini memberikan analisis edukatif berdasarkan data Anda, bukan nasihat keuangan profesional resmi.</div>
+  <div class="chat-input-row">
+    <input type="text" id="chatInput" placeholder="Tanyakan sesuatu..." onkeypress="if(event.key==='Enter')sendMsg()">
+    <button class="chat-send" onclick="sendMsg()">➤</button>
+  </div>
+</div>
+
+<script>
+/* ============ DUMMY DATA ============ */
+const categories = {
+  income: ["Gaji", "Bonus", "Freelance", "Investasi Cair", "Lainnya"],
+  expense: ["Makan & Minum", "Transport", "Tagihan", "Hiburan", "Belanja", "Kesehatan", "Lainnya"]
+};
+
+let transactions = [
+  {date:"2026-08-01", type:"income", cat:"Gaji", desc:"Gaji bulanan Agustus", amt:12000000},
+  {date:"2026-08-02", type:"expense", cat:"Tagihan", desc:"Listrik & internet", amt:850000},
+  {date:"2026-08-03", type:"expense", cat:"Makan & Minum", desc:"Groceries mingguan", amt:620000},
+  {date:"2026-08-04", type:"expense", cat:"Transport", desc:"Bensin & tol", amt:350000},
+  {date:"2026-08-05", type:"income", cat:"Freelance", desc:"Project desain logo", amt:1500000},
+  {date:"2026-08-06", type:"expense", cat:"Hiburan", desc:"Nonton bioskop", amt:150000},
+  {date:"2026-08-08", type:"expense", cat:"Makan & Minum", desc:"Makan siang tim kantor", amt:280000},
+  {date:"2026-08-09", type:"expense", cat:"Belanja", desc:"Pakaian kerja", amt:750000},
+  {date:"2026-08-10", type:"expense", cat:"Makan & Minum", desc:"Kopi & camilan", amt:95000},
+  {date:"2026-08-11", type:"income", cat:"Bonus", desc:"Bonus kinerja Q2", amt:750000},
+  {date:"2026-08-12", type:"expense", cat:"Kesehatan", desc:"Vitamin & obat", amt:220000},
+  {date:"2026-08-13", type:"expense", cat:"Transport", desc:"Grab ke kantor", amt:180000},
+  {date:"2026-08-14", type:"expense", cat:"Makan & Minum", desc:"Makan malam keluarga", amt:420000},
+  {date:"2026-08-15", type:"expense", cat:"Tagihan", desc:"Pulsa & paket data", amt:150000},
+  {date:"2026-08-16", type:"expense", cat:"Hiburan", desc:"Langganan streaming", amt:186000},
+  {date:"2026-08-17", type:"expense", cat:"Makan & Minum", desc:"Weekend brunch", amt:340000},
+  {date:"2026-08-18", type:"expense", cat:"Belanja", desc:"Skincare bulanan", amt:410000},
+];
+
+let investTransactions = [
+  {date:"2026-01-10", instrument:"Reksadana Pasar Uang", jenis:"Reksadana", aksi:"Setor", amt:10000000, current:10850000},
+  {date:"2026-02-15", instrument:"BBCA", jenis:"Saham", aksi:"Beli", amt:8000000, current:9200000},
+  {date:"2026-03-05", instrument:"Emas Antam", jenis:"Emas", aksi:"Beli", amt:5000000, current:5650000},
+  {date:"2026-04-20", instrument:"Bitcoin", jenis:"Crypto", aksi:"Beli", amt:6000000, current:7100000},
+  {date:"2026-05-12", instrument:"Reksadana Saham XYZ", jenis:"Reksadana", aksi:"Setor", amt:15000000, current:16800000},
+  {date:"2026-06-01", instrument:"Deposito BCA", jenis:"Deposito", aksi:"Setor", amt:20000000, current:20650000},
+  {date:"2026-07-08", instrument:"BBRI", jenis:"Saham", aksi:"Beli", amt:7900000, current:8150000},
+  {date:"2026-08-01", instrument:"Reksadana Pasar Uang", jenis:"Reksadana", aksi:"Setor", amt:7000000, current:7050000},
+];
+
+/* ============ NAVIGATION ============ */
+function showPage(id, el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  if(id==='dash-cashflow') setTimeout(renderCashflowCharts, 50);
+  if(id==='dash-invest') setTimeout(renderInvestCharts, 50);
+}
+
+/* ============ TABLE: CASHFLOW ============ */
+function fmtRp(n){
+  return "Rp" + Math.round(n).toLocaleString('id-ID');
+}
+function fmtDate(d){
+  const dt = new Date(d+"T00:00:00");
+  return dt.toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'});
+}
+
+function populateCategoryFilter(){
+  const sel = document.getElementById('filterCategory');
+  const all = [...categories.income, ...categories.expense];
+  [...new Set(all)].forEach(c=>{
+    const o = document.createElement('option');
+    o.value = c; o.textContent = c;
+    sel.appendChild(o);
+  });
+}
+
+let sortState = {col:'date', dir:'desc'};
+
+function setSort(col){
+  if(sortState.col === col){
+    sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortState.col = col;
+    sortState.dir = 'asc';
+  }
+  renderTable();
+}
+
+function updateSortIcons(){
+  document.querySelectorAll('#page-input th.sortable').forEach(th=>{
+    const col = th.dataset.sort;
+    const icon = th.querySelector('.sort-icon');
+    if(col === sortState.col){
+      th.classList.add('sort-active');
+      icon.textContent = sortState.dir === 'asc' ? '▲' : '▼';
+    } else {
+      th.classList.remove('sort-active');
+      icon.textContent = '▲';
+    }
+  });
+}
+
+function renderTable(){
+  const search = document.getElementById('searchBox').value.toLowerCase();
+  const type = document.getElementById('filterType').value;
+  const cat = document.getElementById('filterCategory').value;
+  let rows = transactions.filter(t=>{
+    if(type!=='all' && t.type!==type) return false;
+    if(cat!=='all' && t.cat!==cat) return false;
+    if(search && !t.desc.toLowerCase().includes(search) && !t.cat.toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  const {col, dir} = sortState;
+  rows.sort((a,b)=>{
+    let va = a[col], vb = b[col];
+    if(col === 'amt'){ va = a.amt; vb = b.amt; }
+    else if(typeof va === 'string'){ va = va.toLowerCase(); vb = vb.toLowerCase(); }
+    if(va < vb) return dir === 'asc' ? -1 : 1;
+    if(va > vb) return dir === 'asc' ? 1 : -1;
+    return 0;
+  });
+  updateSortIcons();
+
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = rows.map((t,i)=>`
+    <tr>
+      <td>${fmtDate(t.date)}</td>
+      <td><span class="badge ${t.type}">${t.type==='income'?'Masuk':'Keluar'}</span></td>
+      <td><span class="cat-tag">${t.cat}</span></td>
+      <td>${t.desc}</td>
+      <td class="amt ${t.type}">${t.type==='income'?'+':'−'} ${fmtRp(t.amt)}</td>
+      <td>
+        <div class="row-actions">
+          <button class="icon-btn" title="Edit" onclick="alert('Fitur edit akan tersedia di versi produksi.')">✎</button>
+          <button class="icon-btn" title="Hapus" onclick="deleteTransaction('${t.date}','${t.desc}')">🗑</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  document.getElementById('tableCount').textContent = `${rows.length} transaksi ditampilkan`;
+  const totalIn = rows.filter(t=>t.type==='income').reduce((s,t)=>s+t.amt,0);
+  const totalOut = rows.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amt,0);
+  document.getElementById('tableSum').innerHTML = `Masuk: <strong style="color:var(--green)">${fmtRp(totalIn)}</strong> &nbsp;·&nbsp; Keluar: <strong style="color:var(--terracotta)">${fmtRp(totalOut)}</strong>`;
+}
+
+function deleteTransaction(date, desc){
+  if(confirm('Hapus transaksi ini?')){
+    transactions = transactions.filter(t=>!(t.date===date && t.desc===desc));
+    renderTable();
+  }
+}
+
+/* ============ MODAL: ADD TRANSACTION ============ */
+let currentType = 'income';
+function setType(t){
+  currentType = t;
+  document.getElementById('btnTypeIncome').classList.toggle('active', t==='income');
+  document.getElementById('btnTypeExpense').classList.toggle('active', t==='expense');
+  populateCategorySelect();
+}
+function populateCategorySelect(){
+  const sel = document.getElementById('inputCategory');
+  sel.innerHTML = categories[currentType].map(c=>`<option value="${c}">${c}</option>`).join('');
+}
+function openModal(){
+  document.getElementById('modalOverlay').classList.add('open');
+  populateCategorySelect();
+}
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+function addTransaction(){
+  const date = document.getElementById('inputDate').value;
+  const cat = document.getElementById('inputCategory').value;
+  const amt = parseFloat(document.getElementById('inputAmount').value);
+  const desc = document.getElementById('inputDesc').value || '(Tanpa deskripsi)';
+  if(!date || !amt || amt<=0){
+    alert('Mohon isi tanggal dan jumlah yang valid.');
+    return;
+  }
+  transactions.push({date, type: currentType, cat, desc, amt});
+  closeModal();
+  renderTable();
+  document.getElementById('inputAmount').value='';
+  document.getElementById('inputDesc').value='';
+}
+
+/* ============ TABLE: INVESTASI ============ */
+let investSortState = {col:'date', dir:'desc'};
+
+function setInvestSort(col){
+  if(investSortState.col === col){
+    investSortState.dir = investSortState.dir === 'asc' ? 'desc' : 'asc';
+  } else {
+    investSortState.col = col;
+    investSortState.dir = 'asc';
+  }
+  renderInvestTable();
+}
+
+function updateInvestSortIcons(){
+  document.querySelectorAll('#page-input-invest th.sortable').forEach(th=>{
+    const col = th.dataset.sort;
+    const icon = th.querySelector('.sort-icon');
+    if(col === investSortState.col){
+      th.classList.add('sort-active');
+      icon.textContent = investSortState.dir === 'asc' ? '▲' : '▼';
+    } else {
+      th.classList.remove('sort-active');
+      icon.textContent = '▲';
+    }
+  });
+}
+
+function populateInvestFilters(){
+  const jenisSel = document.getElementById('investFilterJenis');
+  const aksiSel = document.getElementById('investFilterAksi');
+  const jenisSet = [...new Set(investTransactions.map(t=>t.jenis))];
+  const aksiSet = [...new Set(investTransactions.map(t=>t.aksi))];
+  jenisSet.forEach(j=>{
+    const o = document.createElement('option');
+    o.value = j; o.textContent = j;
+    jenisSel.appendChild(o);
+  });
+  aksiSet.forEach(a=>{
+    const o = document.createElement('option');
+    o.value = a; o.textContent = a;
+    aksiSel.appendChild(o);
+  });
+}
+
+function renderInvestTable(){
+  const search = document.getElementById('investSearchBox').value.toLowerCase();
+  const jenis = document.getElementById('investFilterJenis').value;
+  const aksi = document.getElementById('investFilterAksi').value;
+
+  let rows = investTransactions.filter(t=>{
+    if(jenis!=='all' && t.jenis!==jenis) return false;
+    if(aksi!=='all' && t.aksi!==aksi) return false;
+    if(search && !t.instrument.toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  const {col, dir} = investSortState;
+  rows.sort((a,b)=>{
+    let va = a[col], vb = b[col];
+    if(col === 'amt' || col === 'current'){ va = a[col]; vb = b[col]; }
+    else if(typeof va === 'string'){ va = va.toLowerCase(); vb = vb.toLowerCase(); }
+    if(va < vb) return dir === 'asc' ? -1 : 1;
+    if(va > vb) return dir === 'asc' ? 1 : -1;
+    return 0;
+  });
+  updateInvestSortIcons();
+
+  const tbody = document.getElementById('investTableBody');
+  tbody.innerHTML = rows.map(t=>{
+    const gain = t.current - t.amt;
+    const gainPct = ((gain/t.amt)*100).toFixed(1);
+    return `
+    <tr>
+      <td>${fmtDate(t.date)}</td>
+      <td><strong>${t.instrument}</strong></td>
+      <td><span class="cat-tag">${t.jenis}</span></td>
+      <td><span class="badge income">${t.aksi}</span></td>
+      <td class="amt">${fmtRp(t.amt)}</td>
+      <td class="amt ${gain>=0?'income':'expense'}">${fmtRp(t.current)} <span style="font-size:11px">(${gain>=0?'+':''}${gainPct}%)</span></td>
+      <td>
+        <div class="row-actions">
+          <button class="icon-btn" title="Update nilai" onclick="alert('Form update nilai wajar akan tersedia di versi produksi.')">↻</button>
+          <button class="icon-btn" title="Edit">✎</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('investTableCount').textContent = `${rows.length} entri ditampilkan`;
+  const totalSetor = rows.reduce((s,t)=>s+t.amt,0);
+  const totalNilai = rows.reduce((s,t)=>s+t.current,0);
+  document.getElementById('investTableSum').innerHTML = `Modal: <strong style="color:var(--navy)">${fmtRp(totalSetor)}</strong> &nbsp;·&nbsp; Nilai Saat Ini: <strong style="color:var(--green)">${fmtRp(totalNilai)}</strong>`;
+}
+function openInvestModal(){
+  alert('Form tambah transaksi investasi (instrumen, jenis, nominal, tanggal) akan tersedia di versi produksi — sama seperti form cashflow.');
+}
+
+/* ============ CHARTS: CASHFLOW DASHBOARD ============ */
+let chartsInit = {cashflow:false, invest:false};
+function renderCashflowCharts(){
+  if(chartsInit.cashflow) return;
+  chartsInit.cashflow = true;
+
+  new Chart(document.getElementById('chartTrend'), {
+    type:'bar',
+    data:{
+      labels:['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18'],
+      datasets:[
+        {label:'Masuk', data:[12,0,0,0,1.5,0,0,0,0,0.75,0,0,0,0,0,0,0,0], backgroundColor:'#1B7A5A', borderRadius:3},
+        {label:'Keluar', data:[0,0.85,0.62,0.35,0,0.15,0,0.28,0.75,0.095,0,0.22,0.18,0.42,0.15,0.186,0.34,0.41], backgroundColor:'#B4483B', borderRadius:3}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom', labels:{boxWidth:10, font:{size:11}}}},
+      scales:{
+        x:{grid:{display:false}, ticks:{font:{size:10}}},
+        y:{grid:{color:'#EFEDE6'}, ticks:{callback:v=>'Rp'+v+'jt', font:{size:10}}}
+      }
+    }
+  });
+
+  new Chart(document.getElementById('chartExpenseCat'), {
+    type:'doughnut',
+    data:{
+      labels:['Makan & Minum','Tagihan','Belanja','Transport','Hiburan','Kesehatan'],
+      datasets:[{data:[1755000,1000000,1160000,530000,336000,220000], backgroundColor:['#B4483B','#C9A24B','#0B1F3A','#6B8FB5','#8FA3C4','#D9D2C0'], borderWidth:0}]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'right', labels:{boxWidth:10, font:{size:10.5}, padding:10}}}
+    }
+  });
+
+  new Chart(document.getElementById('chartIncomeCat'), {
+    type:'doughnut',
+    data:{
+      labels:['Gaji','Freelance','Bonus'],
+      datasets:[{data:[12000000,1500000,750000], backgroundColor:['#1B7A5A','#5FA98A','#A8D4C0'], borderWidth:0}]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'right', labels:{boxWidth:10, font:{size:10.5}, padding:10}}}
+    }
+  });
+}
+
+/* ============ CHARTS: INVESTMENT DASHBOARD ============ */
+function renderInvestCharts(){
+  if(chartsInit.invest) return;
+  chartsInit.invest = true;
+
+  new Chart(document.getElementById('chartVsInflation'), {
+    type:'line',
+    data:{
+      labels:['Feb','Mar','Apr','Mei','Jun','Jul','Agu'],
+      datasets:[
+        {label:'Return Portofolio', data:[3.2,5.1,6.4,7.8,9.0,10.1,10.8], borderColor:'#0B1F3A', backgroundColor:'rgba(11,31,58,.08)', fill:true, tension:.35, pointRadius:3},
+        {label:'Inflasi YoY', data:[3.55,3.4,2.42,2.6,3.34,2.88,2.88], borderColor:'#B4483B', backgroundColor:'transparent', borderDash:[5,4], tension:.35, pointRadius:3}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        y:{ticks:{callback:v=>v+'%', font:{size:10}}, grid:{color:'#EFEDE6'}},
+        x:{grid:{display:false}, ticks:{font:{size:10}}}
+      }
+    }
+  });
+
+  new Chart(document.getElementById('chartAllocation'), {
+    type:'doughnut',
+    data:{
+      labels:['Reksadana','Deposito','Saham','Crypto','Emas'],
+      datasets:[{data:[36850000,20650000,17350000,7100000,5650000], backgroundColor:['#0B1F3A','#C9A24B','#1B7A5A','#B4483B','#8FA3C4'], borderWidth:0}]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'right', labels:{boxWidth:10, font:{size:10.5}, padding:10}}}
+    }
+  });
+
+  new Chart(document.getElementById('chartGrowth'), {
+    type:'line',
+    data:{
+      labels:['Mar','Apr','Mei','Jun','Jul','Agu'],
+      datasets:[{label:'Nilai Portofolio', data:[68.5,72.1,76.8,80.2,84.1,87.4], borderColor:'#C9A24B', backgroundColor:'rgba(201,162,75,.15)', fill:true, tension:.35, pointRadius:3}]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        y:{ticks:{callback:v=>'Rp'+v+'jt', font:{size:10}}, grid:{color:'#EFEDE6'}},
+        x:{grid:{display:false}, ticks:{font:{size:10}}}
+      }
+    }
+  });
+}
+
+/* ============ CHATBOT ============ */
+let chatMode = 'cashflow';
+const chatSeed = {
+  cashflow: [
+    {role:'bot', text:'Halo! Saya Cashflow Advisor Anda. Saya sudah menganalisis transaksi bulan Agustus — ada yang ingin ditanyakan soal pengeluaran atau pemasukan Anda?'},
+  ],
+  investment: [
+    {role:'bot', text:'Halo! Saya Investment Advisor Anda. Portofolio Anda saat ini bernilai Rp87,4 juta dengan return 10,8% YoY, mengalahkan inflasi 2,88%. Ada yang ingin didiskusikan?'},
+  ]
+};
+let chatHistory = {cashflow:[...chatSeed.cashflow], investment:[...chatSeed.investment]};
+
+function toggleChat(){
+  const panel = document.getElementById('chatPanel');
+  panel.classList.toggle('open');
+  if(panel.classList.contains('open')) renderChat();
+}
+function openChat(mode){
+  switchMode(mode);
+  document.getElementById('chatPanel').classList.add('open');
+}
+function switchMode(mode){
+  chatMode = mode;
+  document.getElementById('modeCashflow').classList.toggle('active', mode==='cashflow');
+  document.getElementById('modeInvestment').classList.toggle('active', mode==='investment');
+  document.getElementById('chatName').textContent = mode==='cashflow' ? 'Cashflow Advisor AI' : 'Investment Advisor AI';
+  renderChat();
+}
+function renderChat(){
+  const body = document.getElementById('chatBody');
+  body.innerHTML = chatHistory[chatMode].map(m=>`<div class="msg ${m.role}">${m.text}</div>`).join('');
+  body.scrollTop = body.scrollHeight;
+}
+
+const botReplies = {
+  cashflow: [
+    "Berdasarkan data Anda, kategori <strong>Makan & Minum</strong> menyumbang 18% dari total pengeluaran bulan ini. Jika ingin menekan, coba tetapkan budget mingguan Rp400rb untuk kategori ini.",
+    "Saldo bersih Anda bulan ini positif Rp4,57 juta. Ini cukup sehat — pertimbangkan mengalokasikan sebagian ke tabungan darurat atau investasi rutin.",
+    "Dibanding bulan lalu, pengeluaran Anda naik 14,5% sementara pemasukan naik 8,2%. Selisih pertumbuhan ini yang perlu diperhatikan agar surplus tidak menyusut.",
+  ],
+  investment: [
+    "Alokasi Anda saat ini: Reksadana 42%, Deposito 24%, Saham 20%, sisanya Crypto & Emas. Ini cukup terdiversifikasi, meski porsi Reksadana agak dominan.",
+    "Real return Anda (return dikurangi inflasi) berada di angka +7,9% — cukup baik. Sebagai perbandingan, deposito saja biasanya hanya memberi real return 1–2%.",
+    "Jika tujuan Anda jangka panjang, mempertimbangkan menambah porsi saham atau reksadana saham bisa meningkatkan potensi return, dengan konsekuensi volatilitas lebih tinggi.",
+  ]
+};
+let replyIdx = {cashflow:0, investment:0};
+
+function sendMsg(){
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if(!text) return;
+  chatHistory[chatMode].push({role:'user', text});
+  renderChat();
+  input.value='';
+
+  const body = document.getElementById('chatBody');
+  const typingEl = document.createElement('div');
+  typingEl.className = 'msg bot typing';
+  typingEl.innerHTML = '<span></span><span></span><span></span>';
+  body.appendChild(typingEl);
+  body.scrollTop = body.scrollHeight;
+
+  setTimeout(()=>{
+    typingEl.remove();
+    const replies = botReplies[chatMode];
+    const reply = replies[replyIdx[chatMode] % replies.length];
+    replyIdx[chatMode]++;
+    chatHistory[chatMode].push({role:'bot', text: reply + '<br><br><em style="color:var(--ink-soft); font-size:11.5px;">— Disclaimer: bukan nasihat keuangan profesional resmi.</em>'});
+    renderChat();
+  }, 1100);
+}
+
+/* ============ INIT ============ */
+populateCategoryFilter();
+populateInvestFilters();
+renderTable();
+renderInvestTable();
+</script>
+
+</body>
+</html>
