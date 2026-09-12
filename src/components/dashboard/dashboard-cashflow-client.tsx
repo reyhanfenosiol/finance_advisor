@@ -24,7 +24,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { CategoryPie } from "@/components/dashboard/category-pie";
+import { CategoryBarChart } from "@/components/dashboard/category-bar-chart";
 
 function monthKey(dateStr: string) {
   return dateStr.slice(0, 7); // YYYY-MM
@@ -307,11 +307,17 @@ export function DashboardCashflowClient({
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="rounded-lg border border-border bg-card p-5">
           <div className="mb-3 text-sm font-medium">Top Kategori Pengeluaran</div>
-          <CategoryPie data={topExpenseCategories} />
+          <CategoryBarChart
+            data={topExpenseCategories}
+            items={periodTx.filter((t) => t.type === "expense")}
+          />
         </div>
         <div className="rounded-lg border border-border bg-card p-5">
           <div className="mb-3 text-sm font-medium">Top Kategori Pemasukan</div>
-          <CategoryPie data={topIncomeCategories} />
+          <CategoryBarChart
+            data={topIncomeCategories}
+            items={periodTx.filter((t) => t.type === "income")}
+          />
         </div>
         <div className="rounded-lg border border-border bg-card p-5">
           <div className="mb-3 text-sm font-medium">Top 5 Pengeluaran Terbesar</div>
