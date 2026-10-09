@@ -45,3 +45,6 @@ next-env.d.ts
 
 # personal data files
 final portofolio finansial.xlsx
+
+# backup data Supabase (berisi data pribadi)
+/backups

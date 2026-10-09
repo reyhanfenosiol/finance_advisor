@@ -94,3 +94,27 @@ export type AiMessage = {
   content: string;
   created_at: string;
 };
+
+export type CryptoAllocation = {
+  symbol: string;
+  coingecko_id: string;
+  target_pct: number;
+  investment_id: string | null;
+  manual_price: number | null;
+};
+
+export type CryptoPlan = {
+  id: string;
+  user_id: string;
+  monthly_dca_amount: number;
+  start_date: string;
+  horizon_years: number;
+  max_portfolio_pct: number;
+  rebalance_threshold_pct: number;
+  return_pessimistic: number;
+  return_moderate: number;
+  return_optimistic: number;
+  allocations: CryptoAllocation[];
+  updated_at: string;
+  created_at: string;
+};
