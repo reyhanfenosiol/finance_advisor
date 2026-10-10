@@ -44,6 +44,10 @@ Bangun aplikasi web **Personal Finance & Investment Tracker** untuk penggunaan p
 ## Referensi Lengkap
 Lihat `PRD.md` untuk skema database detail, daftar halaman/fitur lengkap, struktur folder yang disarankan, dan strategi integrasi AI & data inflasi.
 
+## Alur Update & Deploy
+Baca `docs/DEPLOYMENT.md` sebelum push, deploy, atau menjalankan migration. Isinya: push ke GitHub dengan akun `reyhanfenosiol` (akun aktif `dataspv` ditolak), deploy production lewat Vercel CLI dari checkout bersih (push tidak memicu auto-deploy), migration Supabase dijalankan manual oleh pemilik, domain Cloudflare, dan sumber data eksternal.
+**Setiap ada alur baru atau perubahan alur update dari satu platform ke platform lain (GitHub, Vercel, Supabase, Cloudflare, API eksternal), catat di `docs/DEPLOYMENT.md` pada commit yang sama**, termasuk status migration di tabelnya.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know
