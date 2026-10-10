@@ -132,3 +132,15 @@ export type GoldPrice = {
   platform: string | null;
   created_at: string;
 };
+
+export type EducationPlan = {
+  id: string;
+  user_id: string;
+  children: import("@/lib/education-plan").ChildInfo[];
+  costs: Record<import("@/lib/education-plan").StageKey, import("@/lib/education-plan").StageCost>;
+  education_inflation_pct: number;
+  fund_full_school: boolean;
+  investment_ids: string[];
+  updated_at: string;
+  created_at: string;
+};
