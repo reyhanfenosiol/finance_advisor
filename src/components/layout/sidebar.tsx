@@ -20,6 +20,7 @@ const NAV_GROUPS = [
       { href: "/investasi", label: "Input & Tabel Investasi" },
       { href: "/dashboard/investasi", label: "Dashboard Investasi" },
       { href: "/investasi/crypto-plan", label: "Rencana Crypto 20 Tahun" },
+      { href: "/investasi/emas", label: "Tren & Waktu Beli Emas" },
     ],
   },
 ] as const;

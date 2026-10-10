@@ -118,3 +118,17 @@ export type CryptoPlan = {
   updated_at: string;
   created_at: string;
 };
+
+export type GoldBrand = "antam" | "galeri24" | "digital";
+
+export type GoldPrice = {
+  id: string;
+  user_id: string;
+  brand: GoldBrand;
+  price_date: string;
+  sell_price: number;
+  buyback_price: number | null;
+  source: "otomatis" | "manual";
+  platform: string | null;
+  created_at: string;
+};
