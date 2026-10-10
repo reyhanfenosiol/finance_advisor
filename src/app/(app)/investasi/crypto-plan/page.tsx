@@ -1,5 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
-import { fetchCryptoPricesIdr } from "@/lib/crypto-prices";
+import {
+  fetchCryptoMarkets,
+  fetchCryptoPricesIdr,
+  RECOMMENDATION_CANDIDATES,
+} from "@/lib/crypto-prices";
 import { CryptoPlanClient } from "@/components/investasi/crypto-plan-client";
 import type { CryptoPlan } from "@/types";
 
@@ -30,7 +34,10 @@ export default async function CryptoPlanPage() {
     { coingecko_id: "bitcoin" },
     { coingecko_id: "ethereum" },
   ]).map((a) => a.coingecko_id);
-  const livePrices = await fetchCryptoPricesIdr(coingeckoIds);
+  const [livePrices, markets] = await Promise.all([
+    fetchCryptoPricesIdr(coingeckoIds),
+    fetchCryptoMarkets(RECOMMENDATION_CANDIDATES),
+  ]);
 
   return (
     <CryptoPlanClient
@@ -40,6 +47,7 @@ export default async function CryptoPlanPage() {
       valuations={valuations ?? []}
       latestInflation={inflation?.[0] ?? null}
       livePrices={livePrices}
+      markets={markets}
     />
   );
 }

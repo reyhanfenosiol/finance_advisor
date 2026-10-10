@@ -17,6 +17,8 @@ import { cn } from "@/lib/utils";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { Button } from "@/components/ui/button";
 import { CryptoPlanDialog } from "@/components/investasi/crypto-plan-dialog";
+import { CryptoRecommendation } from "@/components/investasi/crypto-recommendation";
+import type { CryptoMarket } from "@/lib/crypto-prices";
 import type { CryptoPlanInput } from "@/lib/actions/crypto-plan";
 import type {
   CryptoPlan,
@@ -67,6 +69,7 @@ export function CryptoPlanClient({
   valuations,
   latestInflation,
   livePrices,
+  markets,
 }: {
   plan: CryptoPlan | null;
   investments: Investment[];
@@ -74,6 +77,7 @@ export function CryptoPlanClient({
   valuations: InvestmentValuation[];
   latestInflation: InflationData | null;
   livePrices: Record<string, number>;
+  markets: CryptoMarket[];
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -583,6 +587,8 @@ export function CryptoPlanClient({
           </p>
         )}
       </div>
+
+      <CryptoRecommendation markets={markets} defaultCapital={500000} />
 
       <p className="mt-4 text-xs text-muted-foreground">
         Disclaimer: halaman ini adalah alat bantu perencanaan pribadi, bukan nasihat keuangan
