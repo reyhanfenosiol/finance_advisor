@@ -27,6 +27,12 @@ create table if not exists public.crypto_plans (
 
 alter table public.crypto_plans enable row level security;
 
+-- Aman dijalankan ulang.
+drop policy if exists "crypto_plans_select_own" on public.crypto_plans;
+drop policy if exists "crypto_plans_insert_own" on public.crypto_plans;
+drop policy if exists "crypto_plans_update_own" on public.crypto_plans;
+drop policy if exists "crypto_plans_delete_own" on public.crypto_plans;
+
 create policy "crypto_plans_select_own" on public.crypto_plans
   for select using (auth.uid() = user_id);
 create policy "crypto_plans_insert_own" on public.crypto_plans

@@ -67,13 +67,16 @@ Terakhir diverifikasi: 2026-10-10.
 - Urutan aman: tulis migration → minta pemilik menjalankannya → baru deploy kode yang bergantung
   padanya. Halaman sebaiknya tetap tampil walaupun tabel belum ada (lihat cara `tableReady` di
   `src/app/(app)/investasi/emas/page.tsx`).
-- Status migration di database production:
+- Cara cek tabel sudah ada: `GET {NEXT_PUBLIC_SUPABASE_URL}/rest/v1/<tabel>?select=id&limit=1` dengan header `apikey` = anon key → 200 berarti ada, 404 `PGRST205` berarti belum. Nilai env lokal ada di `.env.development.local` (bukan `.env.local`, yang hanya berisi token Vercel).
+- Status migration di database (dicek lewat Supabase di `.env.development.local`; diasumsikan sama dengan production karena keduanya diambil dari Vercel, belum dibandingkan langsung):
 
   | File | Status |
   |---|---|
-  | 0001–0004, 0006 | Sudah diterapkan (fitur yang memakainya berjalan di production) |
+  | 0001–0004 | Sudah diterapkan (tabel transaksi, kategori, investasi, valuasi, inflasi, AI chat terbaca di API — dicek 2026-10-10) |
+  | 0006_crypto_plans.sql | **Belum diterapkan** — tabel `crypto_plans` tidak ada (PGRST205, dicek 2026-10-10). Halaman Rencana Crypto tampil dengan default tapi tombol Simpan Rencana gagal. Aman dijalankan ulang. |
   | 0005_categories_dedupe_unique.sql | Sudah diterapkan — constraint `categories_user_name_type_key` sudah ada (dikonfirmasi 2026-10-10 lewat error 42P07 saat dijalankan ulang). Script kini aman dijalankan ulang. |
   | 0007_gold_prices.sql | Sudah diterapkan oleh pemilik (2026-10-10) |
+  | 0008_education_plans.sql | Sudah diterapkan oleh pemilik (2026-10-10) — dipakai halaman Dana Pendidikan Anak (`/investasi/pendidikan-anak`). Aman dijalankan ulang. |
 
   Buat migration baru yang aman dijalankan ulang (`if not exists`, blok `do $$ … $$`), karena
   status di database tidak bisa dicek otomatis dari sini.
