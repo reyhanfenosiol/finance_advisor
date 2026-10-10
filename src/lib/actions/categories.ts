@@ -29,7 +29,10 @@ export async function ensureDefaultCategories(userId: string) {
 
   await supabase
     .from("categories")
-    .insert(DEFAULT_CATEGORIES.map((c) => ({ ...c, user_id: userId })));
+    .upsert(
+      DEFAULT_CATEGORIES.map((c) => ({ ...c, user_id: userId })),
+      { onConflict: "user_id,name,type", ignoreDuplicates: true }
+    );
 }
 
 export async function createCategoryAction(name: string, type: TransactionType) {
@@ -38,6 +41,16 @@ export async function createCategoryAction(name: string, type: TransactionType) 
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
+
+  const { data: existing } = await supabase
+    .from("categories")
+    .select()
+    .eq("user_id", user.id)
+    .eq("type", type)
+    .ilike("name", name)
+    .maybeSingle();
+
+  if (existing) return existing;
 
   const { data, error } = await supabase
     .from("categories")

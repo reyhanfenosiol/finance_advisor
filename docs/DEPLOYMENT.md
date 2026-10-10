@@ -72,8 +72,11 @@ Terakhir diverifikasi: 2026-10-10.
   | File | Status |
   |---|---|
   | 0001–0004, 0006 | Sudah diterapkan (fitur yang memakainya berjalan di production) |
-  | 0005_categories_dedupe_unique.sql | **Belum dikonfirmasi**; file + perubahan `src/lib/actions/categories.ts` belum di-commit. `upsert(onConflict: "user_id,name,type")` butuh constraint dari 0005, jadi jalankan 0005 dulu sebelum commit/deploy perubahan itu. |
+  | 0005_categories_dedupe_unique.sql | Sudah diterapkan — constraint `categories_user_name_type_key` sudah ada (dikonfirmasi 2026-10-10 lewat error 42P07 saat dijalankan ulang). Script kini aman dijalankan ulang. |
   | 0007_gold_prices.sql | Sudah diterapkan oleh pemilik (2026-10-10) |
+
+  Buat migration baru yang aman dijalankan ulang (`if not exists`, blok `do $$ … $$`), karena
+  status di database tidak bisa dicek otomatis dari sini.
 
   Perbarui tabel ini setiap ada migration baru.
 
