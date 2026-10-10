@@ -8,6 +8,10 @@ import { LogOut } from "lucide-react";
 
 const NAV_GROUPS = [
   {
+    label: "Ringkasan",
+    items: [{ href: "/strategi", label: "Strategi Prioritas" }],
+  },
+  {
     label: "Cashflow Harian",
     items: [
       { href: "/transaksi", label: "Input & Tabel Transaksi" },
@@ -21,6 +25,7 @@ const NAV_GROUPS = [
       { href: "/dashboard/investasi", label: "Dashboard Investasi" },
       { href: "/investasi/crypto-plan", label: "Rencana Crypto 20 Tahun" },
       { href: "/investasi/emas", label: "Tren & Waktu Beli Emas" },
+      { href: "/investasi/pendidikan-anak", label: "Dana Pendidikan Anak" },
     ],
   },
 ] as const;
